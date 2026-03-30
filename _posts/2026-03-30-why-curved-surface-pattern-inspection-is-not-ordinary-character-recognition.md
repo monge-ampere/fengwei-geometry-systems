@@ -1,14 +1,14 @@
 ---
 layout: post
-title: "第二篇：曲面 Pattern 缺陷检测的本质：不是识别字符，而是建立可比较关系"
+title: "曲面 Pattern 缺陷检测的本质：结构化归一化与缺陷测量"
 date: 2026-03-30 08:00:00 +0800
 categories: curved-surface-pattern-inspection
 ---
 
-# Why Curved-Surface Pattern Inspection Is Not Ordinary Character Recognition
+# The Nature of Curved-Surface Pattern Inspection: Structural Normalization and Defect Measurement
 
 > **English Abstract**  
-> This article argues that curved-surface pattern inspection should not be reduced to OCR, template matching, or simple defect classification. Its core lies in establishing a comparable relation over structured patterns under deformation, disturbance, and changing business inputs, and then performing defect measurement on top of that relation.
+> This article argues that curved-surface pattern inspection should not be reduced to ordinary character recognition, simple template matching, or generic defect classification. Its core lies in structural normalization and defect measurement over structured patterns under geometric deformation, imaging disturbance, process variation, and changing business inputs. What matters is not merely recognizing isolated characters, but establishing a stable and comparable relation between the expected pattern and the measured one, and then performing defect measurement on top of that relation. From this perspective, the system is better understood as a structured pattern inspection system rather than a conventional character inspection pipeline.
 
 很多人第一次接触曲面 Pattern 缺陷检测时，往往会自然把它理解为字符识别、模板匹配，或者某种缺陷分类问题。但在我当时设计这套系统时，问题的核心并不在那里。我一开始就很清楚，这件事真正困难的，不是把字符“看出来”，而是如何在产品、图档、业务输入和现场条件不断变化的情况下，仍然建立起稳定、可比较、可实施的检测关系。也正因为如此，这套系统从设计之初就不是围绕“识别字符”展开的，而是围绕结构化归一化与缺陷测量展开的。
 
