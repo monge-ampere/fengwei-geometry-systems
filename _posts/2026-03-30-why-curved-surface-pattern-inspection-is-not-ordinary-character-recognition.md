@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "第二篇：曲面 Pattern 缺陷检测的本质：不是识别字符，而是建立可比较关系"
-date: 2026-03-30 12:00:00 +0800
+date: 2026-03-30 08:00:00 +0800
 categories: curved-surface-pattern-inspection
 ---
 
