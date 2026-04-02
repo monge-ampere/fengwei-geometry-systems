@@ -2,7 +2,6 @@
 layout: post
 title: "第四篇：曲面 Pattern 缺陷检测的核心几何机制——两层配准与注册集、测量集的角色分工"
 date: 2026-03-30 18:00:00 +0800
-categories: curved-surface-pattern-inspection
 ---
 
 # The Core Geometric Mechanism of Curved-Surface Pattern Inspection: Two-Layer Registration and the Functional Division Between the Register Set and the Measure Set
