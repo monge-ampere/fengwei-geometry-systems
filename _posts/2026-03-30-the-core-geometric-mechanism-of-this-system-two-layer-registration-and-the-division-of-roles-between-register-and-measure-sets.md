@@ -8,7 +8,7 @@ categories: curved-surface-pattern-inspection
 # The Core Geometric Mechanism of Curved-Surface Pattern Inspection: Two-Layer Registration and the Functional Division Between the Register Set and the Measure Set
 
 > **English Abstract**  
-> This article explains the core geometric mechanism of the inspection system: a two-layer registration strategy together with the functional separation between the register set and the measure set. The first layer establishes coarse correspondence between local units at the block level, while the second layer brings structural templates into the measured image at a finer scale. At the same time, the system does not force the same points to serve both localization and defect sensing. Instead, it separates the points used for registration from those used for measurement, so that stability and sensitivity can be optimized for different purposes. From this perspective, registration is not the final decision maker, but the geometric foundation on which subsequent defect measurement becomes reliable.
+> This article explains the core geometric mechanism of the inspection system: a two-layer registration strategy together with the functional separation between the register set and the measure set. The first layer establishes coarse correspondence between local units at the block level, while the second layer brings structural templates into the measured image at a finer scale. At the same time, the system does not force the same points to serve both localization and defect sensing. Instead, it separates the points used for registration from those used for measurement, so that stability and sensitivity can be optimized for different purposes. In addition, the article clarifies that the skeleton is not merely a visual template, but the minimum registration unit whose granularity and topological complexity directly affect the robustness of nonrigid alignment. From this perspective, registration is not the final decision maker, but the geometric foundation on which subsequent defect measurement becomes reliable.
 
 在前一篇里，我主要讨论了这套系统为什么能够在不同产品、不同国别、不同产线之间复用，以及 xml 为什么不只是普通配置文件，而更接近一份产品几何描述文件。但模板文件本身仍然只是“静态结构”。它保存了字符库、全局几何锚点、block 序列、拓扑先验和方向容错，却还没有回答一个更核心的问题：这些静态模板究竟如何进入实测图像，并真正支撑起后续缺陷测量？
 
@@ -18,13 +18,14 @@ categories: curved-surface-pattern-inspection
 
 也正因为如此，这套系统并不是“一次配准解决全部问题”。在当前工程实现中，这一思想被具体落成了两层配准：先在较粗层级上建立局部单元之间的大致对应，再在更细层级上让结构模板真正落入实测图像。这里的“两层”不必被理解为唯一可能的形式，它更接近于一种分层配准思想在当时工程规模下的有效实现。若从更一般的角度看，这类机制完全可以被进一步推广为层级化、图结构化的配准组织；但在这套系统所面对的对象规模与节拍约束下，两层已经足够有效，也足够稳定。
 
-与此同时，这套系统也没有把“用来定位的点”和“用来测量的点”粗暴地混成一类，而是进一步区分出注册集与测量集。这样做的原因很简单：最适合建立定位关系的点，不一定最适合感知局部缺陷；反过来，对缺陷最敏感的点，也未必在注册时最稳定。于是，配准和测量虽然连续发生，却并不依赖完全同一批点。
+与此同时，这套系统并没有把“模板”简单理解成一堆统一处理的点。它一方面把 `skeleton` 组织成配准的最小单元，另一方面又在单元内部进一步区分出注册集与测量集。这样做的原因很简单：最适合建立定位关系的单元粒度，不一定最适合感知局部缺陷；而最适合用于定位的点，也不一定最适合用于测量。于是，配准和测量虽然连续发生，却并不依赖完全同一种组织方式。
 
-所以，这一篇真正要讲清楚的是三件事：
+所以，这一篇真正要讲清楚的是四件事：
 
-1. 为什么这套系统必须采用分层配准；
-2. 为什么注册集与测量集要区分角色；
-3. 为什么配准在这里不是最终判决器，而是后续缺陷测量的几何基础。
+1. 为什么这套系统不能跳过配准直接做缺陷判别；
+2. 为什么不是一次配准，而是两层配准；
+3. 为什么 `skeleton` 的粒度本身就是配准设计的一部分；
+4. 为什么注册集与测量集要在模板层就区分角色。
 
 ## 一、为什么这套系统不能跳过配准，直接做缺陷判别
 
@@ -57,53 +58,103 @@ categories: curved-surface-pattern-inspection
 
 *图 1：两层配准的层级示意图。上层负责 block 级粗配准，下层负责 register set / measure set 的精配准与测量。*
 
-## 三、为什么注册集与测量集必须分开
+## 三、为什么 `skeleton` 的粒度本身就是配准设计的一部分
+
+讨论第二层配准时，一个很容易被忽略的问题是：**模板到底以什么作为最小配准单元进入实测图像？**
+
+在这套系统里，这个单元并不是抽象的“全部点集”，而往往就是一个 `skeleton`。而 `skeleton` 又不一定总是对应单个字符，它既可以表示一个字符的骨架，也可以把多个字符、一个 logo、甚至一段更复杂的局部图样合并成一个整体骨架单元。也就是说，`skeleton` 不只是模板库里的一个名字，它实际上决定了第二层配准的基本粒度。
+
+这一点非常重要，因为不同粒度的 `skeleton` 有不同的工程取舍。
+
+如果把单个字符做成一个 `skeleton`，局部配准通常会更精细，对单字符的形变也更敏感，某些缺陷更不容易被“平均掉”。但它的代价是：对一些结构过于简单的对象，尤其是几何约束很弱、拓扑信息很少的字符，配准本身会变得不够稳。
+
+例如像 “1” 这类简单字符，如果它局部少掉一小段，非刚性配准在某些情况下仍然可能把模板“配上去”。原因并不神秘：这类对象的结构自由度高而约束少，局部 break 可能会被平滑形变吸收掉。换句话说，模板虽然对齐了，但缺陷本身却没有因此被可靠地显现出来，这就会带来现场漏检风险。
+
+而对带有回环、分叉，或者更复杂内部几何组织的对象，情况就会不一样。像 “B”“6” 这类结构，或者把多个字符合并成一个整体骨架之后，配准时会得到更强的整体约束。其原因在于：一旦对象内部存在更丰富的拓扑关系或更长程的结构耦合，非刚性配准就不那么容易只靠局部拉伸或滑移把缺损“抹平”。简单说，**结构越复杂，模板越不容易在错误位置上“假装配准成功”**。
+
+这就是为什么在汉字、不规则图形，或者一些局部结构过于简单的字符区域里，把多个字符合并为一个 `skeleton` 往往反而更鲁棒。这样做虽然会牺牲一部分单字符粒度的灵活性，但它会显著降低配准失败和过杀的风险，也更不容易让缺陷被非刚性形变吸收掉。
+
+因此，这里的 `skeleton` 粒度并不是模板制作上的随手选择，而本身就是配准设计的一部分。  
+单字符 `skeleton` 的优势在于灵敏；  
+多字符 `skeleton` 的优势在于鲁棒；  
+而真正合理的取舍，来自对象结构本身及其拓扑约束强弱。
+
+## 四、为什么注册集与测量集必须在模板层就分开
 
 这套系统里另一个非常关键、也非常容易被忽略的设计，是注册集与测量集的角色分工。
 
 很多人在做检测时，会很自然地默认：既然一组点能用来定位模板，那它们当然也可以直接拿来做缺陷测量。但在真实工程里，这两件事往往并不完全重合。最适合用来建立定位关系的点，不一定最适合感知局部异常；反过来，对缺陷最敏感的点，也不一定在注册时最稳定。
 
-因此，我在系统设计时没有把这两类点粗暴地混为一谈，而是明确区分出两种角色：
+因此，这套系统并不是在运行时才临时把点分成两类，而是在模板层就已经把这种角色分工编码了进去。最直接的证据，就是读取 `skeleton` 点属性时的这段逻辑：
 
-- **注册集**：负责把模板稳定地带到实测图像中；
-- **测量集**：在定位关系已经建立之后，用来实际展开局部测量与异常判断。
+```cpp
+x = atoi(p_p->Attribute("x"));
+y = atoi(p_p->Attribute("y"));
+t = atoi(p_p->Attribute("t")); // point type
+
+if (1 == t)
+{
+    s.ps4regist[s.num4regist][0] = x;
+    s.ps4regist[s.num4regist][1] = y;
+    s.num4regist++;
+}
+else if (0 == t)
+{
+    s.ps4measure[s.num4measure][0] = x;
+    s.ps4measure[s.num4measure][1] = y;
+    s.num4measure++;
+}
+```
+
+这段代码的意义并不只是“把点读进来”。它真正说明的是：同一个 `skeleton` 内部的点，并不是天然同质的，而是从模板描述层就已经被区分成了两种角色：
+
+- `t = 1` 的点进入注册集；
+- `t = 0` 的点进入测量集。
+
+也就是说，注册集与测量集并不是后处理阶段才拆开的两个点集，而是一开始就写在模板里的角色分工。这种设计的意义非常大，因为它使得“定位稳定性”和“缺陷敏感性”可以在模板层就被分别优化，而不必强迫同一批点同时承担两个并不完全一致的目标。
 
 这种区分在不同对象上会有不同体现。对于枝杈结构，例如字符，中轴线往往同时具有较强的结构代表性和测量可用性，因此注册集和测量集可以接近甚至重合。但对于实心结构，例如某些实心 logo 或填充区域，边缘点更适合用来建立定位关系，而内部点可能更适合承接后续测量。也就是说，这套系统并不是先验地规定“所有对象都用同一批点做所有事”，而是根据对象结构去决定：哪些点最适合注册，哪些点最适合测量。
 
-这一步的意义非常大。因为一旦把注册和测量分开，系统就获得了更高的灵活性：定位可以优先追求稳定性，测量则可以优先追求敏感性，而不必让同一批点同时承担两个并不完全一致的目标。反过来，如果把两者强行混在一起，往往就是注册不够稳，测量也不够准。
+一旦把注册和测量分开，系统就获得了更高的灵活性：定位可以优先追求稳定性，测量则可以优先追求敏感性，而不必让同一批点同时承担两个并不完全一致的目标。反过来，如果把两者强行混在一起，往往就是注册不够稳，测量也不够准。
 
 ![左侧为枝杈结构，注册集与测量集可接近甚至重合；右侧为实心结构，边缘点用于注册，内点用于测量。]({{ "/assets/images/figure4_register_vs_measure_sets_v2.png" | relative_url }})
 
 *图 2：注册集与测量集分离示意图。左侧为枝杈结构，右侧为实心结构。*
 
-## 四、两层配准在系统里到底是怎么串起来的
+## 五、两层配准在系统里到底是怎么串起来的
 
-从系统流程上看，分层配准和注册集、测量集的角色分工并不是彼此分离的几个概念，而是紧密串成一条主线。
+从系统流程上看，分层配准、`skeleton` 粒度以及注册集、测量集的角色分工，并不是彼此分离的几个概念，而是紧密串成一条主线。
 
 系统首先读取产品模板与 block 组织信息，并在较粗层级上对 block 的几何代表点——例如中心点集合或全局锚点集合——进行第一层点集配准，以确定哪些局部单元在当前图像中成立，以及它们与模板之间的大致对应关系。换句话说，第一层并不是一个模糊的“先找一找位置”，而已经是在较粗粒度上建立局部单元之间的几何对应。
 
-随后，对已经落入合理局部范围的 block，系统再读取其对应的注册集与测量集，并在第二层配准中用注册集把模板真正带到实测图像上。这个过程中，测量集并不是另起一套独立流程，而是随着配准关系同步推进。最后，镭断、色异常、多镭、偏移等局部缺陷测量，才沿着这些已经被带到实测图像中的测量点展开。
+随后，对已经落入合理局部范围的 block，系统再读取其对应的 `skeleton` 单元，并根据模板中已经编码好的点角色，把注册集与测量集分别取出。在第二层配准中，系统用注册集把模板真正带到实测图像上；而测量集并不是另起一套独立流程，而是随着配准关系同步推进。最后，镭断、色异常、多镭、偏移等局部缺陷测量，才沿着这些已经被带到实测图像中的测量点展开。
 
 如果把这一过程再压缩一点，它的逻辑其实就是：
 
-> 先在粗层级上建立局部单元之间的大致对应，再在细层级上建立结构模板与实测对象之间的精细对应，最后把缺陷测量放在这个对应关系之上。
+> 先在粗层级上建立局部单元之间的大致对应，再在细层级上以 `skeleton` 为最小单元建立结构模板与实测对象之间的精细对应，最后把缺陷测量放在这个对应关系之上。
 
 所以，配准在这里并不只是“求一个变换”或者“返回一个分数”，它真正做的是把模板关系变成后续检测可以依赖的几何事实。
 
 从工程实现的角度看，这一过程更接近下面这样的流程：
 
 ```text
-for each block:
+for each matched block:
     coarse registration on block-level representative points
     determine approximate correspondence
-    load template register set and measure set
-    fine registration on register set
-    move measure set together
+    select skeleton unit(s) in this block
+    load register set and measure set from template
+    fine registration on the register set
+    move the measure set together
     perform local defect measurement along measurement points
 ```
-这段流程看上去并不复杂，但它把系统里最关键的分工都压缩进去了：第一层负责建立 block 级对应，第二层负责让模板真正落位，而缺陷测量则始终建立在已经落位的测量集之上。
 
-## 五、为什么配准在这里不是最终判决器
+这段流程看上去并不复杂，但它把系统里最关键的分工都压缩进去了：  
+第一层负责建立 block 级对应；  
+第二层负责让模板真正落位；  
+`skeleton` 决定了精配准的最小组织单元；  
+而缺陷测量则始终建立在已经落位的测量集之上。
+
+## 六、为什么配准在这里不是最终判决器
 
 很多人一看到配准，就很容易把它理解成“最后给出一个分数”或者“最后决定是不是匹配成功”。但在这套系统里，配准并不是最终判决器。它当然可以给出某种全局失配量，并在某些情形下辅助 mismatch 一类的判定；但对于镭断、色异常、多镭这类真正依赖局部结构的缺陷类型来说，配准分数本身并不构成结论。
 
@@ -115,17 +166,18 @@ for each block:
 
 这也是为什么我一直更愿意把配准理解为几何基础，而不是最终判决器。它本身不是“最后答案”，但没有它，后面的答案就没有可靠的参照系。
 
-## 六、这一层为什么是整套系统真正的核心几何机制
+## 七、这一层为什么是整套系统真正的核心几何机制
 
-如果把 xml 看作这套系统的静态骨架，那么两层配准与注册集/测量集的角色分工，就是这套系统真正开始“动起来”的地方。
+如果把 xml 看作这套系统的静态骨架，那么两层配准、`skeleton` 作为最小配准单元的组织方式，以及注册集 / 测量集在模板层就被区分开的角色分工，就是这套系统真正开始“动起来”的地方。
 
 模板在这里不再只是存储对象，而是开始进入图像；  
 block 不再只是组织单元，而是开始建立对应；  
-注册集不再只是模板点，而是开始承担定位任务；  
+`skeleton` 不再只是模板库中的一个名字，而是开始决定精配准的基本粒度；  
+注册集不再只是模板点的一部分，而是开始承担定位任务；  
 测量集也不再只是附属点，而是开始沿着正确的几何关系进入实测对象，并真正支撑起后续缺陷测量。
 
-也就是说，到这一层为止，这套系统才第一次把“模板组织”转化成“检测能力”。
+也就是说，到这一层为止，这套系统才第一次把“模板组织”真正转化成了“检测能力”。
 
-这也是为什么我会把这一层看作整套系统的核心几何机制。因为它真正解决了这样一个问题：模板如何不只是静态存在，而是成为后续检测可以依赖的几何事实。
+这也是为什么我会把这一层看作整套系统的核心几何机制。因为它真正解决了这样一个问题：模板如何不只是静态存在，而是成为后续检测可以依赖的几何事实；以及，模板的粒度、拓扑复杂度与点角色分工，又如何共同影响配准的稳定性与后续测量的可靠性。
 
 下一篇，我会继续沿着这里往下写：在测量集已经落位之后，镭断、色异常、多镭等缺陷究竟是如何被逐点测量、逐类归并，并最终转化成系统输出结果的。
