@@ -2,7 +2,6 @@
 layout: post
 title: "第六篇：曲面 Pattern 检测系统为什么能在产线上稳定跑起来——节拍、并行与配置路由"
 date: 2026-04-01 12:00:00 +0800
-categories: curved-surface-pattern-inspection
 ---
 
 # Why This Curved-Surface Pattern Inspection System Can Run Stably on Production Lines: Takt Time, Parallelism, and Configuration Routing
