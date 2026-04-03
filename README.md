@@ -6,7 +6,7 @@ A technical series on curved-surface pattern defect inspection, written from the
 
 ## About
 
-This repository hosts a multi-part technical series on curved-surface pattern inspection.
+This repository hosts a multi-part technical series on curved-surface pattern defect inspection.
 
 Rather than treating the subject as ordinary character recognition, simple template matching, or generic defect classification, the series approaches it as an industrial vision problem involving:
 
