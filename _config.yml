@@ -1,3 +1,5 @@
-title: "Curved-Surface Pattern Inspection: An Industrial-Grade System Rewritten"
-description: "A series on curved-surface pattern inspection as an industrial vision problem involving geometric deformation, structural normalization, template parameterization, and deployable system design."
+title: "曲面 Pattern 缺陷检测：工业级系统十讲"
+description: "一个关于曲面 Pattern 缺陷检测的系列：从问题本体、模板组织、配准与测量，到配置路由、多线程、插件机制与工程落地。"
 theme: minima
+lang: zh-CN
+timezone: Asia/Shanghai
