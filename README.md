@@ -1,6 +1,6 @@
-# Curved-Surface Pattern Inspection: Ten Lectures on an Industrial-Grade System
+# Curved-Surface Pattern Defect Inspection: Ten Lectures on an Industrial-Grade System
 
-A technical series on curved-surface pattern inspection, written from the perspective of geometric structure, defect measurement, and deployable industrial system design.
+A technical series on curved-surface pattern defect inspection, written from the perspective of geometric structure, defect measurement, and deployable industrial system design.
 
 **Website:** https://monge-ampere.github.io/curved-surface-pattern-inspection/
 
