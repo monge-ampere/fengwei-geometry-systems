@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "第十讲：为什么一套接近产品化的工业算法系统，最后仍差了一步——从算法可行到组织最后一公里"
-date: 2026-04-02 12:00:00 +0800
+date: 2026-04-04 12:00:00 +0800
 ---
 
 # Why an Almost Productized Industrial Algorithm System Still Fell One Step Short: From Algorithmic Feasibility to the Last Mile of Organization
